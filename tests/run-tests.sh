@@ -156,18 +156,30 @@ check "same name with other content stays" '[ -e "$FAKE_HOME/Downloads/notes (1)
 check "zip is never moved by a category" '[ -e "$FAKE_HOME/Documents/Work.zip" ]'
 
 build_home
-old_file "$FAKE_HOME/Downloads/old.pdf"
-old_file "$FAKE_HOME/Desktop/old.txt"
-old_file "$FAKE_HOME/Downloads/opened lately.pdf"
-old_file "$FAKE_HOME/Downloads/Project/part.txt"
-old_file "$FAKE_HOME/Documents/tax.pdf"
-run clean --apply unopened-files > /dev/null 2>&1
-check "unopened file in Downloads goes to Trash" '[ -e "$FAKE_HOME/.Trash/old.pdf" ] && [ ! -e "$FAKE_HOME/Downloads/old.pdf" ]'
-check "unopened file on Desktop goes to Trash" '[ -e "$FAKE_HOME/.Trash/old.txt" ]'
-check "recently opened old file stays" '[ -e "$FAKE_HOME/Downloads/opened lately.pdf" ]'
-check "new file stays" '[ -e "$FAKE_HOME/Downloads/contract.pdf" ]'
-check "file inside a folder stays" '[ -e "$FAKE_HOME/Downloads/Project/part.txt" ]'
-check "Documents stays" '[ -e "$FAKE_HOME/Documents/tax.pdf" ]'
+old_file "$FAKE_HOME/Downloads/Pngtree-coffee_123.png"
+old_file "$FAKE_HOME/Desktop/vecteezy_cup_456.png"
+old_file "$FAKE_HOME/Downloads/opened Pngtree.png"
+old_file "$FAKE_HOME/Downloads/Project/Pngtree-part.png"
+old_file "$FAKE_HOME/Documents/Pngtree-kept.png"
+echo data > "$FAKE_HOME/Downloads/Pngtree-new.png"
+for keep in "Lucas Spain Passport.jpg" "Payslip - 2025.pdf" "Statement_2025_10.pdf" "Signed-Renewal 2025.pdf" \
+  "Pos Operatorio.pdf" "Certificate.pdf" "front.JPG" "IMG_1197.HEIC" "Lucas CV.pdf" "Untitled design.mp4"; do
+  old_file "$FAKE_HOME/Downloads/$keep"
+done
+run forgotten > "$WORK/forgotten-web.txt" 2>&1
+check "paperwork is listed as pick-only" 'sed -n "/^Other loose files/,/^$/p" "$WORK/forgotten-web.txt" | grep -q "Passport"'
+check "paperwork is not in the category list" '! sed -n "/^Stock and web files/,/^$/p" "$WORK/forgotten-web.txt" | grep -qE "Passport|Payslip"'
+run clean --apply unopened-web-files > /dev/null 2>&1
+check "old stock file in Downloads goes to Trash" '[ -e "$FAKE_HOME/.Trash/Pngtree-coffee_123.png" ] && [ ! -e "$FAKE_HOME/Downloads/Pngtree-coffee_123.png" ]'
+check "old stock file on Desktop goes to Trash" '[ -e "$FAKE_HOME/.Trash/vecteezy_cup_456.png" ]'
+check "recently opened stock file stays" '[ -e "$FAKE_HOME/Downloads/opened Pngtree.png" ]'
+check "new stock file stays" '[ -e "$FAKE_HOME/Downloads/Pngtree-new.png" ]'
+check "file inside a folder stays" '[ -e "$FAKE_HOME/Downloads/Project/Pngtree-part.png" ]'
+check "Documents stays" '[ -e "$FAKE_HOME/Documents/Pngtree-kept.png" ]'
+for keep in "Lucas Spain Passport.jpg" "Payslip - 2025.pdf" "Statement_2025_10.pdf" "Signed-Renewal 2025.pdf" \
+  "Pos Operatorio.pdf" "Certificate.pdf" "front.JPG" "IMG_1197.HEIC" "Lucas CV.pdf" "Untitled design.mp4"; do
+  check "old personal file stays: $keep" "[ -e \"$FAKE_HOME/Downloads/$keep\" ] && [ ! -e \"$FAKE_HOME/.Trash/$keep\" ]"
+done
 
 build_home
 rm -f "$FAKE_HOME"/Downloads/*
