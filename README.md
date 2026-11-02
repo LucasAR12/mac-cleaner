@@ -52,7 +52,7 @@ Categories: `user-caches`, `installers`, `uv`, `npm`, `gradle`, `xcode-derived-d
 Clone this repository into your agent's skills folder. For Claude Code:
 
 ```bash
-git clone <repository-url> ~/.claude/skills/mac-cleaner
+git clone https://github.com/LucasAR12/mac-cleaner.git ~/.claude/skills/mac-cleaner
 ```
 
 Then ask something like "why is my disk full?". The agent reports first and asks before cleaning anything.
