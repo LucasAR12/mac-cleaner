@@ -18,7 +18,10 @@ export LC_ALL=C
 shopt -s nullglob
 
 CATEGORIES="user-caches installers uv npm gradle xcode-derived-data simulators-unavailable old-logs"
-PERSONAL_CATEGORIES="old-screenshots old-recordings duplicate-downloads unopened-files"
+PERSONAL_CATEGORIES="old-screenshots old-recordings duplicate-downloads unopened-web-files"
+# Names of files saved from stock sites and web pages. A list of what is clearly
+# disposable, because "not opened in 6 months" also describes a passport scan.
+WEB_FILE_NAMES=( \( -iname '*Pngtree*' -o -iname 'vecteezy_*' -o -iname 'AdobeStock_*' -o -iname 'pexels-*' -o -iname 'depositphotos_*' -o -iname 'image-from-rawpixel*' -o -iname 'YTDown.com_*' -o -iname 'thumbnail_Outlook*' -o -iname 'Outlook-*' \) )
 LOG_AGE_DAYS=7
 MEDIA_AGE_DAYS=90
 FORGOTTEN_DAYS=180
@@ -164,11 +167,19 @@ forgotten_downloads() {
 
 # Loose files only: taking one file out of a folder could break a project, and
 # Documents is left out because paperwork can sit unopened for years and matter.
-unopened_files() {
+unopened_web_files() {
   local folder
   for folder in "$HOME/Desktop" "$HOME/Downloads"; do
     [ -d "$folder" ] || continue
-    find "$folder" -maxdepth 1 -type f ! -name '.*' -mtime +"$FORGOTTEN_DAYS" -print0 2>/dev/null
+    find "$folder" -maxdepth 1 -type f "${WEB_FILE_NAMES[@]}" -mtime +"$FORGOTTEN_DAYS" -print0 2>/dev/null
+  done | drop_recently_opened "$FORGOTTEN_DAYS"
+}
+
+unopened_other_files() {
+  local folder
+  for folder in "$HOME/Desktop" "$HOME/Downloads"; do
+    [ -d "$folder" ] || continue
+    find "$folder" -maxdepth 1 -type f ! -name '.*' ! "${WEB_FILE_NAMES[@]}" -mtime +"$FORGOTTEN_DAYS" -print0 2>/dev/null
   done | drop_recently_opened "$FORGOTTEN_DAYS"
 }
 
@@ -183,7 +194,7 @@ personal_files() {
     old-screenshots) screenshot_files ;;
     old-recordings) recording_files ;;
     duplicate-downloads) duplicate_downloads ;;
-    unopened-files) unopened_files ;;
+    unopened-web-files) unopened_web_files ;;
   esac
 }
 
@@ -241,7 +252,8 @@ cmd_forgotten() {
   screenshot_files | print_list "Screenshots older than $MEDIA_AGE_DAYS days (category: old-screenshots)"
   recording_files | print_list "Screen recordings older than $MEDIA_AGE_DAYS days (category: old-recordings)"
   duplicate_downloads | print_list "Exact copies in Downloads (category: duplicate-downloads)"
-  unopened_files | print_list "Loose files on Desktop and in Downloads not opened for $FORGOTTEN_DAYS days (category: unopened-files)"
+  unopened_web_files | print_list "Stock and web files not opened for $FORGOTTEN_DAYS days (category: unopened-web-files)"
+  unopened_other_files | print_list "Other loose files not opened for $FORGOTTEN_DAYS days; may include IDs, payslips and contracts (pick with: trash <path>)"
   forgotten_downloads | print_list "Folders in Downloads untouched for $FORGOTTEN_DAYS days (pick with: trash <path>)"
   unopened_documents | print_list "Items in Documents untouched for $FORGOTTEN_DAYS days; check before removing (pick with: trash <path>)"
   large_forgotten_files | print_list "Files over $LARGE_FILE_MB MB untouched for $FORGOTTEN_DAYS days (pick with: trash <path>)"
@@ -293,7 +305,7 @@ cmd_speed() {
 category_kb() {
   local dir
   case "$1" in
-    old-screenshots|old-recordings|duplicate-downloads|unopened-files) personal_files "$1" | sum_du ;;
+    old-screenshots|old-recordings|duplicate-downloads|unopened-web-files) personal_files "$1" | sum_du ;;
     user-caches) cache_entries | sum_du ;;
     installers) installer_files | sum_du ;;
     uv) dir="$(uv_cache_dir)"; if [ -n "$dir" ]; then size_kb "$dir"; else echo 0; fi ;;
@@ -310,7 +322,7 @@ category_note() {
     old-screenshots) echo "not opened for $MEDIA_AGE_DAYS days; moved to the Trash, list them with: forgotten" ;;
     old-recordings) echo "not opened for $MEDIA_AGE_DAYS days; moved to the Trash, list them with: forgotten" ;;
     duplicate-downloads) echo "exact copies like 'file (1).pdf'; moved to the Trash" ;;
-    unopened-files) echo "loose files on Desktop and in Downloads not opened for $FORGOTTEN_DAYS days; moved to the Trash" ;;
+    unopened-web-files) echo "stock and web files not opened for $FORGOTTEN_DAYS days; moved to the Trash" ;;
     user-caches) echo "app caches; apps rebuild them, first launch is slower" ;;
     installers) echo ".dmg/.pkg in Downloads; moved to the Trash, not deleted" ;;
     uv) echo "Python packages; downloaded again when needed" ;;
@@ -354,7 +366,7 @@ clean_category() {
         move_to_trash "$entry" || failed=$((failed + 1))
       done < <(installer_files)
       ;;
-    old-screenshots|old-recordings|duplicate-downloads|unopened-files)
+    old-screenshots|old-recordings|duplicate-downloads|unopened-web-files)
       mkdir -p "$HOME/.Trash" 2>/dev/null
       while IFS= read -r -d '' entry; do
         move_to_trash "$entry" || failed=$((failed + 1))
