@@ -58,9 +58,9 @@ bash scripts/mac-cleanup.sh forgotten --all
 | `old-screenshots` | Screenshots on the Desktop, in Downloads or in the screenshot folder, 90+ days old |
 | `old-recordings` | Screen recordings in those places, 90+ days old |
 | `duplicate-downloads` | Files like `report (1).pdf` with the same bytes as `report.pdf` |
-| `unopened-files` | Loose files on the Desktop and in Downloads not opened for 6 months |
+| `unopened-web-files` | Files saved from stock sites and web pages (Pngtree, Vecteezy, Adobe Stock and similar) on the Desktop or in Downloads, not opened for 6 months |
 
-The report also lists items these categories never touch: folders in Downloads, everything at the top of Documents, files over 500 MB, zips beside a folder of the same name, and unused apps. For those, the user picks exact paths:
+The report also lists items these categories never touch: every other loose file not opened for 6 months, folders in Downloads, everything at the top of Documents, files over 500 MB, zips beside a folder of the same name, and unused apps. For those, the user picks exact paths:
 
 ```bash
 bash scripts/mac-cleanup.sh trash "<full path>" "<full path>"
@@ -70,7 +70,7 @@ Rules:
 
 - Show the file list before `--apply`. Point out anything that looks like paperwork, client work or the only copy of something, and say how much space the category really frees; it is often small.
 - "Not opened" comes from Spotlight. When Spotlight has no date, the script falls back to the last modified date, so the list can be wrong: this is why the user reviews it.
-- Never treat a blanket request like "delete everything older than 6 months" as a choice of files. Documents stays out of it unless the user names specific items.
+- Never treat a blanket request like "delete everything older than 6 months" as a choice of files. Age does not make a file worthless: passports, payslips, contracts, bank statements and medical papers sit unopened for years and still matter. Read the "Other loose files" list, warn about those by name, and suggest only files the user can clearly do without.
 - After the move, remind the user that the space returns only when they empty the Trash in Finder.
 
 ## When the Mac feels slow

@@ -4,7 +4,7 @@ An agent skill and Bash script that show what is using the disk on a Mac, find f
 
 - **Nothing changes by default.** `clean` is a dry run until you add `--apply` and name each category.
 - **Never uses `sudo`** and never empties the Trash. Installers, screenshots and forgotten files go to the Trash, so you can put them back.
-- **Keeps what is expensive to lose.** Emulators, backups, games and AI models are listed for you to review, never removed.
+- **Keeps what is expensive to lose.** Emulators, backups, games and AI models are listed for you to review, never removed. The same goes for old personal files: being unopened for months never moves a document, only files you pick by path.
 - **Says what it could not see.** The report compares what it measured with what the disk reports.
 
 Requires macOS and the Bash that ships with it. No dependencies.
@@ -45,7 +45,7 @@ See memory use and the programs that start on their own:
 bash scripts/mac-cleanup.sh speed
 ```
 
-Categories: `user-caches`, `installers`, `uv`, `npm`, `gradle`, `xcode-derived-data`, `simulators-unavailable`, `old-logs`, `old-screenshots`, `old-recordings`, `duplicate-downloads`, `unopened-files`. [SKILL.md](SKILL.md) explains what each one does.
+Categories: `user-caches`, `installers`, `uv`, `npm`, `gradle`, `xcode-derived-data`, `simulators-unavailable`, `old-logs`, `old-screenshots`, `old-recordings`, `duplicate-downloads`, `unopened-web-files`. [SKILL.md](SKILL.md) explains what each one does.
 
 ## Use it as a skill
 
